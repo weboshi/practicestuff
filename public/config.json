@@ -1,0 +1,13 @@
+{
+    "currencies":[{"EUR": 1000}, {"CAD": 1000}, {"GBP": 1000}, {"VND": 1000}, {"HKD": 1000}, {"AUD": 1000}, {"JPY": 1000}],
+    "settings":{
+        "margin": 1, 
+        "commission": 1, 
+        "eurbuy": 1, 
+        "eursell": 1.5, 
+        "cadbuy": 2, 
+        "cadsell": 2.5, 
+        "exchangeRate": 5, 
+        "amount": 15000
+    }
+}

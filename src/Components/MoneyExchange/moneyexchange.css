@@ -1,0 +1,23 @@
+.tableModal>tbody>tr>td {
+    border: 0 !important;
+}
+
+.exchangeMoney {
+    width: 100%;
+    min-height: 100vh;
+    text-align: center;
+}
+
+.table-div {
+    width: 50%;
+    margin: auto;
+    text-align: left;
+}
+
+.password-splash {
+    width: 400px;
+    margin: auto;
+    
+    
+
+}
