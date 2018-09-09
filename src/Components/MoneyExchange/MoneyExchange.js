@@ -129,8 +129,8 @@ class MoneyExchange extends Component {
             let currObj = {
             currency: newArray[i],
             amount: amountArray[i],
-            buy: parseFloat(((rate[i] * this.props.settings.margin) + (rate[i])).toFixed(4)),
-            sell: parseFloat(((rate[i]) - (rate[i] * this.props.settings.margin)).toFixed(4))
+            buy: parseFloat((1 / ((rate[i] * this.props.settings.margin) + (rate[i])))).toFixed(4),
+            sell: parseFloat((1/(((rate[i]) - (rate[i] * this.props.settings.margin)))).toFixed(4))
             };
 
             mainArray.push(currObj)
@@ -183,7 +183,7 @@ class MoneyExchange extends Component {
   }
 
   handlePurchase(){
-    const newAmount = (this.state.amount - this.state.totalPurchaseAmount)
+    const newAmount = (this.props.settings.amount - this.state.totalPurchaseAmount)
     if(newAmount < 0) {
 
       console.log('not enough funds')

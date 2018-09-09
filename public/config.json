@@ -1,5 +1,5 @@
 {
-    "currencies":[{"EUR": 1000}, {"CAD": 1000}, {"GBP": 1000}, {"VND": 1000}, {"HKD": 1000}, {"AUD": 1000}, {"JPY": 1000}],
+    "currencies":{"EUR": 1000, "CAD": 1000, "GBP": 1000, "HKD": 1000, "AUD": 1000, "JPY": 1000},
     "settings":{
         "margin": 1, 
         "commission": 1, 

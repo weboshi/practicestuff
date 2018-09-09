@@ -3,7 +3,7 @@ import { initialSettings } from "../constants/action-types";
 
 
 const initialState = {
-  currencies: {EUR: 1000, CAD: 1000, GBP: 1000, VND: 1000, HKD: 1000, AUD: 1000, JPY: 1000},
+  currencies: {EUR: 1000, CAD: 1000, GBP: 1000, HKD: 1000, AUD: 1000, JPY: 1000},
   settings: {margin: .02, commission: 1, eurbuy: '9', eursell: '9', cadbuy: '9', cadsell: '9', exchangeRate: '9', amount: '100'}
 };
 
