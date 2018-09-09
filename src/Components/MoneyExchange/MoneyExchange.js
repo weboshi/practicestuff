@@ -3,6 +3,7 @@ import { Table, Thead, Modal, Header, Body, Button, Title, OverlayTrigger, Popov
 import { connect } from "react-redux";
 import { UPDATE } from "../../js/actions/index";
 import { INITIALIZE } from '../../js/actions/index';
+import timestamp from 'unix-timestamp';
 import './moneyexchange.css'
 import axios from 'axios';
 import { Navigation } from '../Navbar/Navbar';
@@ -137,15 +138,18 @@ class MoneyExchange extends Component {
 
         }
         console.log(mainArray)
+        console.log(results.data.timestamp)
 
-        let timeStamp = (results.data.timestamp * 1000)
-
+        let timeStamp = (timestamp.toDate(results.data.timestamp)).toString()
+        console.log(typeof(timeStamp))
+       
         let newSettings = obj
 
         this.props.UPDATE(newSettings);
         this.setState({
-          tableData: mainArray
-        })
+          tableData: mainArray,
+          timeStamp: timeStamp
+        }, () => (console.log(this.state.timeStamp)))
       
       })
   }
@@ -233,7 +237,7 @@ class MoneyExchange extends Component {
     const theExchange = (
       <div className="exchangeMoney">
       <Navigation/>
-      <span>Exchange rates shown as per {this.props.settings.commission}</span>
+      <span>Exchange rates shown as per {this.state.timeStamp}</span>
       <BootstrapTable keyField='id' data={ this.state.tableData } columns={ columns } rowEvents={ rowEvents } />
       <div className="table-div">
       <Modal show={this.state.show} onHide={this.handleClose}>
