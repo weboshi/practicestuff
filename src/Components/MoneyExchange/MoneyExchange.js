@@ -17,6 +17,9 @@ const columns = [{
 }, {
   dataField: 'sell',
   text: 'Sell Rate'
+}, {
+  dataField: 'amount',
+  text: 'Amount',
 }];
 
 
@@ -57,7 +60,8 @@ class MoneyExchange extends Component {
       amountToBuy: '',
       refresh: 0,
       authorized: false,
-      password: 'treehouse'
+      password: 'treehouse',
+      notEnough: false
     }
     this.getCurrencyValue = this.getCurrencyValue.bind(this);
     this.handleShow = this.handleShow.bind(this);
@@ -103,16 +107,19 @@ class MoneyExchange extends Component {
 
     axios.get('http://www.apilayer.net/api/live?access_key=' + access_key )
       .then(results => {
-        console.log(this.props.currencies)
+  
+
         const newArray = Object.keys(this.props.currencies)
-
+        const amountArray = Object.values(this.props.currencies)
+         
         const rate = []; 
-
         const varD = 'results.data.quotes.USD'
 
         for (let i=0;i<newArray.length;i++){
             rate[i] = eval(varD + newArray[i])
           }
+
+
 
         var obj = {}
         var mainArray = []
@@ -121,6 +128,7 @@ class MoneyExchange extends Component {
 
             let currObj = {
             currency: newArray[i],
+            amount: amountArray[i],
             buy: parseFloat(((rate[i] * this.props.settings.margin) + (rate[i])).toFixed(4)),
             sell: parseFloat(((rate[i]) - (rate[i] * this.props.settings.margin)).toFixed(4))
             };
@@ -147,15 +155,7 @@ class MoneyExchange extends Component {
   }
 
   handleClose() {
-    this.setState({ show: false, amountToBuy: '' });
-  }
-
-  handleShow() {
-    this.setState({ show: true });
-  }
-
-  handleShowJPY() {
-    this.setState({ show: true });
+    this.setState({ show: false, amountToBuy: '' }, (console.log(this.state.amountToBuy)));
   }
 
   handleShow() {
@@ -163,32 +163,39 @@ class MoneyExchange extends Component {
   }
 
   handleChange(event) {
+    console.log(this.props.settings.commission)
     this.setState({ amountToBuy: event.target.value }, () => {
-      console.log(this.state.amountToBuy)
-      console.log(this.state.subTotal)
-      console.log(this.state.totalPurchaseAmount)
+ 
+      this.handleTotal();
     });
-    this.handleTotal();
+    console.log(this.props.settings.commission)
+
   }
 
-  
+
   handleTotal(){
-    let subTotal = (this.state.amountToBuy * this.state.buyRate)
-    let totalPurchaseAmount = (subTotal + this.props.settings.commission)
+    let subTotal = parseFloat((this.state.amountToBuy * this.state.buyRate)).toFixed(4)
+    let totalPurchaseAmount = parseFloat((subTotal + this.props.settings.commission)).toFixed(4)
     this.setState({
       subTotal: subTotal,
       totalPurchaseAmount: totalPurchaseAmount
-    }, () => {
-      console.log(this.state.amountToBuy)
-      console.log(this.state.subTotal)
-      console.log(this.state.totalPurchaseAmount)
     })
   }
 
   handlePurchase(){
-    let newAmount = {amount: (this.props.settings.amount - this.state.totalPurchaseAmount)}
-    console.log(newAmount)
-    this.props.UPDATE(newAmount)
+    const newAmount = (this.state.amount - this.state.totalPurchaseAmount)
+    if(newAmount < 0) {
+
+      console.log('not enough funds')
+      this.setState({
+        notEnough: 1,
+      })
+    }
+    else{
+      console.log(newAmount)
+      this.props.UPDATE(newAmount)
+    }
+  
   }
 
   render(){
@@ -214,7 +221,8 @@ class MoneyExchange extends Component {
       this.setState({
         modalCurrency: row.currency,
         buyRate: row.buy,
-        sellRate: row.sell
+        sellRate: row.sell,
+        amount: row.amount
       })
       this.handleShow();
       
@@ -264,7 +272,7 @@ class MoneyExchange extends Component {
         </tbody>
       </Table>
       </Modal.Body>
-      <Modal.Footer>
+      <Modal.Footer> {this.state.notEnough == 1 && <span style={{color:'red',marginRight:'20px',fontWeight:'bold'}}>Not enough funds</span>}
         <Button onClick={this.handleClose}>Cancel</Button> <Button onClick={this.handlePurchase}>Buy</Button>
       </Modal.Footer>
     </Modal>
