@@ -49,7 +49,8 @@ class MoneyExchange extends Component {
       refresh: 0,
       authorized: false,
       password: 'treehouse',
-      notEnough: false
+      notEnough: false,
+      symbols: {EUR: '€', CAD:'C$',  HKD: 'HK$', GBP: '£', JPY: '¥', AUD: 'A$' }
     }
     this.getCurrencyValue = this.getCurrencyValue.bind(this);
     this.handleShow = this.handleShow.bind(this);
@@ -67,6 +68,7 @@ class MoneyExchange extends Component {
     this.handleCellClick = this.handleCellClick.bind(this)
     this.handleCellClick2 = this.handleCellClick2.bind(this)
     this.handleSale = this.handleSale.bind(this)
+    this.makeSymbol = this.makeSymbol.bind(this)
   }
 
   authorize = (e) => {
@@ -158,7 +160,7 @@ class MoneyExchange extends Component {
   }
 
   handleClose2() {
-    this.setState({ show: false, amountToBuy: '', subTotal: '', totalPurchaseAmount: '' }, (console.log(this.state.amountToBuy)));
+    this.setState({ show2: false, amountToBuy: '', subTotal: '', totalPurchaseAmount: '' }, (console.log(this.state.amountToBuy)));
   }
 
   handleShow() {
@@ -301,6 +303,12 @@ class MoneyExchange extends Component {
     
   }
 
+  makeSymbol(){
+    const sign = this.state.modalCurrency
+    console.log(sign)
+    return ( this.state.symbols[sign] )
+  }
+
   makeTable(){
 
     const tableStuff = this.state.tableData
@@ -382,7 +390,7 @@ class MoneyExchange extends Component {
       <Modal.Body>
       <FormGroup>
                 <InputGroup >
-                <InputGroup.Addon>€</InputGroup.Addon>
+                <InputGroup.Addon>{this.makeSymbol()}</InputGroup.Addon>
                   <FormControl type='text' id='amountToBuy' onChange={this.handleChange} value={this.state.amountToBuy}/>
                     <InputGroup.Addon>.00</InputGroup.Addon>
                 </InputGroup>
@@ -423,7 +431,7 @@ class MoneyExchange extends Component {
       <Modal.Body>
       <FormGroup>
                 <InputGroup >
-                <InputGroup.Addon>€</InputGroup.Addon>
+                <InputGroup.Addon>{this.makeSymbol()}</InputGroup.Addon>
                   <FormControl type='text' id='amountToBuy' onChange={this.handleChange2} value={this.state.amountToBuy}/>
                     <InputGroup.Addon>.00</InputGroup.Addon>
                 </InputGroup>
@@ -452,7 +460,7 @@ class MoneyExchange extends Component {
         </tbody>
       </Table>
       </Modal.Body>
-      <Modal.Footer> {this.state.notEnough == 1 && <span style={{color:'red',marginRight:'20px',fontWeight:'bold'}}>Not enough funds</span>}
+      <Modal.Footer> {this.state.notEnough == 1 && <span style={{color:'red',marginRight:'20px',fontWeight:'bold'}}>Not enough inventory</span>}
         <Button onClick={this.handleClose2}>Cancel</Button> <Button onClick={this.handleSale}>Sell</Button>
       </Modal.Footer>
     </Modal>
