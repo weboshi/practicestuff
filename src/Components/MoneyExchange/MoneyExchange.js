@@ -154,11 +154,11 @@ class MoneyExchange extends Component {
   }
 
   handleClose() {
-    this.setState({ show: false, amountToBuy: '', subTotal: '' }, (console.log(this.state.amountToBuy)));
+    this.setState({ show: false, amountToBuy: '', subTotal: '', totalPurchaseAmount: '' }, (console.log(this.state.amountToBuy)));
   }
 
   handleClose2() {
-    this.setState({ show: false, amountToBuy: '', subTotal: '' }, (console.log(this.state.amountToBuy)));
+    this.setState({ show: false, amountToBuy: '', subTotal: '', totalPurchaseAmount: '' }, (console.log(this.state.amountToBuy)));
   }
 
   handleShow() {
@@ -220,19 +220,19 @@ class MoneyExchange extends Component {
     else {
  
       let newCurr = this.state.modalCurrency
-      const newObj = {[newCurr]: newAmount}
+      const newTotal = {[newCurr]: newAmount}
 
-      this.props.UPDATE(newObj)
-      alert('You purchased' + this.state.amountToBuy + " " + this.state.modalCurrency + ' for $' + this.state.totalPurchaseAmount)
-      this.setState({
+      this.props.UPDATEAMOUNT(newTotal)
+      alert('You purchased ' + this.state.amountToBuy + " " + this.state.modalCurrency + ' for $' + this.state.totalPurchaseAmount)
+      this.setState({ 
         amountToBuy: ''
-      })
+      }, () => this.getCurrencyValue())
       this.handleClose()
     }
   }
 
   handleSale(){
-    const newAmount = (this.state.amount - this.state.totalPurchaseAmount)
+    const newAmount = (this.props.settings.amount + this.state.totalPurchaseAmount)
     const currTotal = (this.state.amount - this.state.amountToBuy)
 
     if (currTotal < 0) {
@@ -241,8 +241,8 @@ class MoneyExchange extends Component {
       })
     }
     else {
-      let newCurr = this.state.modalCurrency
-      const newObj = {[newCurr]: newAmount}
+      
+      const newObj = {amount: newAmount}
   
       this.props.UPDATE(newObj)
       alert('You exchanged' + this.state.amountToBuy + " " + this.state.modalCurrency + ' for $' + this.state.totalPurchaseAmount)
@@ -312,7 +312,7 @@ class MoneyExchange extends Component {
       <td>{tableStuff[i].currency}</td>
       <td id='Buy'  onClick={this.handleCellClick} data-value={[tableStuff[i].currency,tableStuff[i].buy,tableStuff[i].amount]}>{tableStuff[i].buy}</td>
       <td id='Sell' onClick={this.handleCellClick2} data-value={[tableStuff[i].currency,tableStuff[i].sell,tableStuff[i].amount]}>{tableStuff[i].sell}</td>
-      <td>{tableStuff[i].amount}</td>
+      <td style={(tableStuff[i].amount < 250) ? styles.red : styles.black}>{tableStuff[i].amount}</td>
     </tr>
       </tbody>
     );

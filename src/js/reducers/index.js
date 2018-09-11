@@ -15,7 +15,7 @@ const rootReducer = (state = initialState, action) => {
     case updateSettings:
       return {...state,  settings: {...state.settings, ...action.payload}}
       case updateAmount:
-      return {...state, currencies:{...action.payload}, settings:{...state.settings}}
+      return {...state, currencies:{...state.currencies, ...action.payload}}
     default:
       return state;
   }
