@@ -7,6 +7,7 @@ import timestamp from 'unix-timestamp';
 import './moneyexchange.css'
 import axios from 'axios';
 import { Navigation } from '../Navbar/Navbar';
+import { combineReducers } from 'redux';
 
 
 
@@ -17,13 +18,16 @@ const styles = {
   },
   red: {
     color: '#ff0000'
+  },
+  td: {
+    textAlign: 'center'
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
     UPDATE: newSettings => dispatch(UPDATE(newSettings)),
-    INITIALIZE: firstSettings => dispatch(INITIALIZE(firstSettings)),
+    INITIALIZE: (firstSettings, cb) => dispatch(INITIALIZE(firstSettings, cb)),
     UPDATEAMOUNT: newTotal => dispatch(UPDATEAMOUNT(newTotal))
   };
 };
@@ -84,19 +88,15 @@ class MoneyExchange extends Component {
   makeTheState = () => {
     console.log('hi')
     axios.get('config.json')
-    .then(results => {
-      const currencies = results.data.currencies
-      const settings = results.data.settings
-      const firstSettings = {currencies: currencies,
-      settings: settings}
+    .then(results => { 
+      console.log(results.data)
+     
+      const newObj = results.data
     
    
-      this.props.INITIALIZE(firstSettings)
+      this.props.INITIALIZE(newObj, this.getCurrencyValue())
     })
-    .then(
-      setTimeout(this.getCurrencyValue(), 50000))
-
-
+ 
   }
 
   getCurrencyValue = () => {
@@ -106,10 +106,12 @@ class MoneyExchange extends Component {
     axios.get('http://www.apilayer.net/api/live?access_key=' + access_key )
       .then(results => {
   
-
+        console.log(this.props.currencies)
+        console.log(this.props.settings)
         const newArray = Object.keys(this.props.currencies)
         const amountArray = Object.values(this.props.currencies)
-         
+        console.log(newArray)
+         console.log(amountArray)
         const rate = []; 
         const varD = 'results.data.quotes.USD'
 
@@ -152,7 +154,7 @@ class MoneyExchange extends Component {
   }
 
   componentDidMount() {
-    this.getCurrencyValue()
+    this.makeTheState()
   }
 
   handleClose() {
@@ -235,6 +237,7 @@ class MoneyExchange extends Component {
 
   handleSale(){
     const newAmount = (this.props.settings.amount + this.state.totalPurchaseAmount)
+    
     const currTotal = (this.state.amount - this.state.amountToBuy)
 
     if (currTotal < 0) {
@@ -243,14 +246,16 @@ class MoneyExchange extends Component {
       })
     }
     else {
-      
+      const total = (parseFloat(this.state.amountToBuy) + this.state.amount)
+      const newTotal = {[this.state.modalCurrency]: total}
       const newObj = {amount: newAmount}
   
       this.props.UPDATE(newObj)
-      alert('You exchanged' + this.state.amountToBuy + " " + this.state.modalCurrency + ' for $' + this.state.totalPurchaseAmount)
+      this.props.UPDATEAMOUNT(newTotal)
+      alert('You exchanged ' + this.state.amountToBuy + " " + this.state.modalCurrency + ' for $' + this.state.totalPurchaseAmount)
       this.setState({
         amountToBuy: ''
-      })
+      }, () => this.getCurrencyValue())
       this.handleClose2()
     }
   }
@@ -399,15 +404,15 @@ class MoneyExchange extends Component {
         <tbody>
           <tr>
             <td style={{border:0}}>Exchange Rate</td>
-            <td>{this.state.buyRate}</td>
+            <td style={styles.td}>{this.state.buyRate}</td>
           </tr>
           <tr>
             <td>Subtotal</td>
-            <td>{this.state.subTotal}</td>
+            <td style={styles.td}>{this.state.subTotal}</td>
           </tr>
           <tr>
             <td>Commission</td>
-            <td>{this.props.settings.commission}</td>
+            <td >{this.props.settings.commission}</td>
           </tr>
         </tbody>
   

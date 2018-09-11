@@ -11,7 +11,7 @@ const initialState = {
 const rootReducer = (state = initialState, action) => {
   switch (action.type) {
     case initialSettings:
-      return {...state, currencies:{...action.payload}, settings: {...action.payload}}
+      return {...state, ...action.payload}
     case updateSettings:
       return {...state,  settings: {...state.settings, ...action.payload}}
       case updateAmount:
