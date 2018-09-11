@@ -18,7 +18,9 @@ export const Navigation = () => {
     <NavItem eventKey={2} href="/settings">
       Admin
     </NavItem>
-    
+    <NavItem>
+      <img style={{height:'50px'}} src='logo.jpg'/>
+    </NavItem>
   </Nav>
 
 </Navbar>

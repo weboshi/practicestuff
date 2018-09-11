@@ -8,6 +8,7 @@
         "cadbuy": 2, 
         "cadsell": 2.5, 
         "exchangeRate": 5, 
-        "amount": 15000
+        "amount": 15000,
+        "mainCurrency": "USD"
     }
 }

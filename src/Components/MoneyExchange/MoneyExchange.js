@@ -19,8 +19,9 @@ const styles = {
   red: {
     color: '#ff0000'
   },
-  td: {
-    textAlign: 'center'
+  modal: {
+    textAlign: 'center',
+    width: '200px'
   }
 }
 
@@ -249,6 +250,7 @@ class MoneyExchange extends Component {
       const total = (parseFloat(this.state.amountToBuy) + this.state.amount)
       const newTotal = {[this.state.modalCurrency]: total}
       const newObj = {amount: newAmount}
+      console.log(newTotal)
   
       this.props.UPDATE(newObj)
       this.props.UPDATEAMOUNT(newTotal)
@@ -373,10 +375,10 @@ class MoneyExchange extends Component {
     const theExchange = (
       <div className="exchangeMoney">
       <Navigation/>
-      <span className='timestamp'>Exchange rates shown as per {this.state.timeStamp}</span>
+      <span className='timestamp'>Exchange rates shown as per {this.state.timeStamp}. You have {this.state.amount} {this.props.settings.mainCurrency} left.</span>
       <div className="table-div">
     
-  <Table striped={true} bordered condensed hover>
+  <Table striped={true} bordered={false} condensed hover>
   <thead>
     <tr>
       <th>Currency</th>
@@ -404,22 +406,22 @@ class MoneyExchange extends Component {
         <tbody>
           <tr>
             <td style={{border:0}}>Exchange Rate</td>
-            <td style={styles.td}>{this.state.buyRate}</td>
+            <td style={styles.modal}>{this.state.buyRate}</td>
           </tr>
           <tr>
             <td>Subtotal</td>
-            <td style={styles.td}>{this.state.subTotal}</td>
+            <td style={styles.modal}>{this.state.subTotal}</td>
           </tr>
           <tr>
             <td>Commission</td>
-            <td >{this.props.settings.commission}</td>
+            <td style={styles.modal}>{this.props.settings.commission}</td>
           </tr>
         </tbody>
   
         <tbody>
           <tr>
             <td>Total</td>
-            <td>{this.state.totalPurchaseAmount}</td>
+            <td style={styles.modal}>{this.state.totalPurchaseAmount}</td>
           </tr>
         </tbody>
       </Table>
@@ -445,22 +447,22 @@ class MoneyExchange extends Component {
         <tbody>
           <tr>
             <td style={{border:0}}>Exchange Rate</td>
-            <td>{this.state.sellRate}</td>
+            <td style={styles.modal}>{this.state.sellRate}</td>
           </tr>
           <tr>
             <td>Subtotal</td>
-            <td>{this.state.subTotal}</td>
+            <td style={styles.modal}>{this.state.subTotal}</td>
           </tr>
           <tr>
             <td>Commission</td>
-            <td>{this.props.settings.commission}</td>
+            <td style={styles.modal}>{this.props.settings.commission}</td>
           </tr>
         </tbody>
   
         <tbody>
           <tr>
             <td>Total</td>
-            <td>{this.state.totalPurchaseAmount}</td>
+            <td style={styles.modal}>{this.state.totalPurchaseAmount}</td>
           </tr>
         </tbody>
       </Table>
