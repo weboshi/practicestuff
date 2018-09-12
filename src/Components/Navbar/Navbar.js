@@ -8,7 +8,7 @@ export const Navigation = () => {
     <Navbar>
   <Navbar.Header>
     <Navbar.Brand>
-      <a href="/">Airport Currency Exchange Office</a>
+      <a style={{fontSize:'2.2em'}} href="/">Airport Currency Exchange Office</a>
     </Navbar.Brand>
   </Navbar.Header>
   <Nav pullRight>
@@ -19,7 +19,7 @@ export const Navigation = () => {
       Admin
     </NavItem>
     <NavItem>
-      <img style={{height:'50px'}} src='logo.jpg'/>
+      <img style={{height:'70px'}} src='logo.jpg'/>
     </NavItem>
   </Nav>
 

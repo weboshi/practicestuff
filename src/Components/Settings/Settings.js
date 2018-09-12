@@ -57,7 +57,7 @@ class Settings extends Component {
                             </Col>
                             <Col xs={3}>
                             <InputGroup >
-                                    <FormControl type='text' id='commission' onChange={this.handleChange}/>
+                                    <FormControl type='number' id='commission' onChange={this.handleChange}/>
                                     <InputGroup.Addon>%</InputGroup.Addon>
                                 </InputGroup>
                             </Col>
@@ -68,7 +68,7 @@ class Settings extends Component {
                             </Col>
                             <Col xs={3}>
                             <InputGroup>
-                                    <FormControl type="text" id='surcharge' onChange={this.handleChange} />
+                                    <FormControl type="number" id='surcharge' onChange={this.handleChange} />
                                     <InputGroup.Addon>$</InputGroup.Addon>
                             </InputGroup>
                             </Col>
@@ -79,7 +79,7 @@ class Settings extends Component {
                             </Col>
                             <Col xs={3}>
                                 <InputGroup>
-                                    <FormControl type="text" id='minimalCommission' onChange={this.handleChange}/>
+                                    <FormControl type="number" id='minimalCommission' onChange={this.handleChange}/>
                                     <InputGroup.Addon>$</InputGroup.Addon>
                                 </InputGroup>
                                 </Col>
@@ -90,7 +90,7 @@ class Settings extends Component {
                                 </Col>
                             <Col xs={3}>
                                 <InputGroup >
-                                    <FormControl type="text" id='margin' onChange={this.handleChange} />
+                                    <FormControl type="number" id='margin' onChange={this.handleChange} />
                                     <InputGroup.Addon>%</InputGroup.Addon>
                                 </InputGroup>
                             </Col>

@@ -22,6 +22,9 @@ const styles = {
   modal: {
     textAlign: 'center',
     width: '200px'
+  },
+  button: {
+    backgroundColor: 'yellow'
   }
 }
 
@@ -74,6 +77,7 @@ class MoneyExchange extends Component {
     this.handleCellClick2 = this.handleCellClick2.bind(this)
     this.handleSale = this.handleSale.bind(this)
     this.makeSymbol = this.makeSymbol.bind(this)
+    this.getValidationState = this.getValidationState.bind(this)
   }
 
   authorize = (e) => {
@@ -100,21 +104,29 @@ class MoneyExchange extends Component {
  
   }
 
-  getCurrencyValue = () => {
+
+  getExchangeRatesTimer = () => {
+
+    const rateInterval = (this.props.settings.interval * 60000)
+    
+    setInterval(this.getCurrencyValue(), rateInterval)
+
+    
+  }
+
+  getCurrencyValue = () => { 
 
     const access_key = 'b520f09438b3a39356b70de4949ce37c';
 
     axios.get('http://www.apilayer.net/api/live?access_key=' + access_key )
       .then(results => {
   
-        console.log(this.props.currencies)
-        console.log(this.props.settings)
+   
         const newArray = Object.keys(this.props.currencies)
         const amountArray = Object.values(this.props.currencies)
-        console.log(newArray)
-         console.log(amountArray)
         const rate = []; 
-        const varD = 'results.data.quotes.USD'
+        const mainCurr = this.props.settings.mainCurrency
+        const varD = 'results.data.quotes.' + mainCurr
 
         for (let i=0;i<newArray.length;i++){
             rate[i] = eval(varD + newArray[i])
@@ -137,7 +149,7 @@ class MoneyExchange extends Component {
         }
         console.log(mainArray)
 
-
+        console.log(timestamp.toDate(results.data.timestamp))
         let timeStamp = (timestamp.toDate(results.data.timestamp)).toString()
         
        
@@ -338,6 +350,15 @@ class MoneyExchange extends Component {
     })
   }
 
+  getValidationState() {
+    const type = typeof(this.state.value)
+
+  
+    if (type == 'number') return 'success';
+    else 
+    return null;
+  }
+
   render(){
     const popover = (
       <Popover id="modal-popover" title="popover">
@@ -357,20 +378,8 @@ class MoneyExchange extends Component {
       </div>
   );
 
-  const rowEvents = {
-    onClick: (e, row, rowIndex) => {
-      console.log(row.currency)
-      this.setState({
-        modalCurrency: row.currency,
-        buyRate: row.buy,
-        sellRate: row.sell,
-        amount: row.amount
-      })
-      this.handleShow();
-      
 
-    }
-  };
+
 
     const theExchange = (
       <div className="exchangeMoney">
@@ -398,7 +407,7 @@ class MoneyExchange extends Component {
       <FormGroup>
                 <InputGroup >
                 <InputGroup.Addon>{this.makeSymbol()}</InputGroup.Addon>
-                  <FormControl type='text' id='amountToBuy' onChange={this.handleChange} value={this.state.amountToBuy}/>
+                  <FormControl type='number' id='amountToBuy' onChange={this.handleChange} value={this.state.amountToBuy}/>
                     <InputGroup.Addon>.00</InputGroup.Addon>
                 </InputGroup>
       </FormGroup>
@@ -427,7 +436,7 @@ class MoneyExchange extends Component {
       </Table>
       </Modal.Body>
       <Modal.Footer> {this.state.notEnough == 1 && <span style={{color:'red',marginRight:'20px',fontWeight:'bold'}}>Not enough funds</span>}
-        <Button onClick={this.handleClose}>Cancel</Button> <Button onClick={this.handlePurchase}>Buy</Button>
+        <Button onClick={this.handleClose}>Cancel</Button> <Button style={styles.button} onClick={this.handlePurchase}>Buy</Button>
       </Modal.Footer>
     </Modal>
 
@@ -439,7 +448,7 @@ class MoneyExchange extends Component {
       <FormGroup>
                 <InputGroup >
                 <InputGroup.Addon>{this.makeSymbol()}</InputGroup.Addon>
-                  <FormControl type='text' id='amountToBuy' onChange={this.handleChange2} value={this.state.amountToBuy}/>
+                  <FormControl type='number' id='amountToBuy' onChange={this.handleChange2} value={this.state.amountToBuy}/>
                     <InputGroup.Addon>.00</InputGroup.Addon>
                 </InputGroup>
       </FormGroup>
@@ -468,7 +477,7 @@ class MoneyExchange extends Component {
       </Table>
       </Modal.Body>
       <Modal.Footer> {this.state.notEnough == 1 && <span style={{color:'red',marginRight:'20px',fontWeight:'bold'}}>Not enough inventory</span>}
-        <Button onClick={this.handleClose2}>Cancel</Button> <Button onClick={this.handleSale}>Sell</Button>
+        <Button onClick={this.handleClose2}>Cancel</Button> <Button style={styles.button} onClick={this.handleSale}>Sell</Button>
       </Modal.Footer>
     </Modal>
   </div>
