@@ -313,8 +313,9 @@ class MoneyExchange extends Component {
 
 
   handleTotal(){
-    let subTotal = parseFloat((this.state.amountToBuy * this.state.buyRate)).toFixed(4)
-    let totalPurchaseAmount = parseFloat((subTotal + this.props.settings.commission)).toFixed(4)
+    let subTotal = Number(parseFloat((this.state.amountToBuy * this.state.buyRate)).toFixed(4))
+    let totalPurchaseAmount = Number(parseFloat((subTotal + this.props.settings.commission)).toFixed(4))
+    
     this.setState({
       subTotal: subTotal,
       totalPurchaseAmount: totalPurchaseAmount
@@ -322,8 +323,8 @@ class MoneyExchange extends Component {
   }
 
   handleTotal2(){
-    let subTotal = parseFloat((this.state.amountToBuy * this.state.sellRate)).toFixed(4)
-    let totalPurchaseAmount = parseFloat((subTotal + this.props.settings.commission)).toFixed(4)
+    let subTotal = Number(parseFloat((this.state.amountToBuy * this.state.sellRate)).toFixed(4))
+    let totalPurchaseAmount = Number(parseFloat((subTotal + this.props.settings.commission)).toFixed(4))
     this.setState({
       subTotal: subTotal,
       totalPurchaseAmount: totalPurchaseAmount
