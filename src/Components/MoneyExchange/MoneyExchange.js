@@ -128,7 +128,7 @@ class MoneyExchange extends Component {
       
     const currValues = currArray.toString()
 
-    axios.get('http://www.apilayer.net/api/live?access_key=' + access_key + '&currencies=' + currValues )
+    axios.get('https://cors-anywhere.herokuapp.com/https://www.apilayer.net/api/live?access_key=' + access_key + '&currencies=' + currValues )
     .then(results => {
       console.log(results)
       
@@ -216,7 +216,7 @@ class MoneyExchange extends Component {
     const mainCurrency = this.props.settings.mainCurrency;
     
 
-    axios.get('http://www.apilayer.net/api/live?access_key=' + access_key + '&source=' + mainCurrency)
+    axios.get('https://cors-anywhere.herokuapp.com/https://www.apilayer.net/api/live?access_key=' + access_key + '&source=' + mainCurrency)
       .then(results => {
    
         const newArray = Object.keys(this.props.currencies)
