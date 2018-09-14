@@ -49,8 +49,19 @@ class Settings extends Component {
             <div className='settings-container'>
                 <Navigation/>
                 <div className="form-div">
-                <h1><Glyphicon glyph='cog'/> Settings </h1>
+                <h1 style={{marginBottom:'50px', marginTop:'50px'}}><Glyphicon glyph='cog'/> Settings </h1>
                     <Form horizontal>
+                    <FormGroup>
+                            <Col componentClass={ControlLabel} xs={3} style={styles.col}> 
+                                Interval for Updating Rates (Minutes)
+                            </Col>
+                            <Col xs={3}>
+                            <InputGroup >
+                                    <FormControl type='number' id='interval' onChange={this.handleChange}/>
+                                    <InputGroup.Addon>MIN</InputGroup.Addon>
+                                </InputGroup>
+                            </Col>
+                        </FormGroup>
                         <FormGroup>
                             <Col componentClass={ControlLabel} xs={3} style={styles.col}> 
                                 Commission

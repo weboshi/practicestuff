@@ -31,7 +31,7 @@ const styles = {
 const mapDispatchToProps = dispatch => {
   return {
     UPDATE: newSettings => dispatch(UPDATE(newSettings)),
-    INITIALIZE: (firstSettings, cb) => dispatch(INITIALIZE(firstSettings, cb)),
+    INITIALIZE: (firstSettings) => dispatch(INITIALIZE(firstSettings)),
     UPDATEAMOUNT: newTotal => dispatch(UPDATEAMOUNT(newTotal))
   };
 };
@@ -58,7 +58,8 @@ class MoneyExchange extends Component {
       authorized: false,
       password: 'treehouse',
       notEnough: false,
-      symbols: {EUR: '€', CAD:'C$',  HKD: 'HK$', GBP: '£', JPY: '¥', AUD: 'A$' }
+      symbols: {EUR: '€', CAD:'C$',  HKD: 'HK$', GBP: '£', JPY: '¥', AUD: 'A$' },
+      error: '',
     }
     this.getCurrencyValue = this.getCurrencyValue.bind(this);
     this.handleShow = this.handleShow.bind(this);
@@ -78,6 +79,8 @@ class MoneyExchange extends Component {
     this.handleSale = this.handleSale.bind(this)
     this.makeSymbol = this.makeSymbol.bind(this)
     this.getValidationState = this.getValidationState.bind(this)
+    this.getExchangeRatesTimer = this.getExchangeRatesTimer.bind(this)
+    this.updateRates = this.updateRates.bind(this)
   }
 
   authorize = (e) => {
@@ -92,16 +95,18 @@ class MoneyExchange extends Component {
 
   makeTheState = () => {
     console.log('hi')
+    console.log(this.props)
     axios.get('config.json')
     .then(results => { 
       console.log(results.data)
      
-      const newObj = results.data
+      const firstSettings = results.data
     
    
-      this.props.INITIALIZE(newObj, this.getCurrencyValue())
-    })
- 
+      this.props.INITIALIZE(firstSettings)
+    }).then(() => {
+      this.getCurrencyValue()})
+    
   }
 
 
@@ -109,18 +114,110 @@ class MoneyExchange extends Component {
 
     const rateInterval = (this.props.settings.interval * 60000)
     
-    setInterval(this.getCurrencyValue(), rateInterval)
+    setInterval(this.updateRates(), rateInterval)
 
     
+  }
+
+  updateRates = () => {
+
+    const access_key = 'b520f09438b3a39356b70de4949ce37c';
+    const currArray = Object.keys(this.props.currencies)
+    const oldArray = this.state.tableData
+    console.log(oldArray)
+      
+    const currValues = currArray.toString()
+
+    axios.get('http://www.apilayer.net/api/live?access_key=' + access_key + '&currencies=' + currValues )
+    .then(results => {
+      console.log(results)
+      
+
+
+      const newArray = Object.keys(results.data.quotes)
+      const valueArray = Object.values(results.data.quotes)
+      console.log(valueArray)
+  
+      const newRatesArray = [];
+      const compareRates = [];
+      const finalArray = [];
+
+      // comparing old rates to new rates
+      console.log(oldArray[0].rate)
+      console.log(valueArray[0])
+
+      for (let i=0; i < newArray.length; i++) {
+        // if the rates are different, meaning they changed, then push the values into an array to be merged later
+        if (oldArray[i].rate == valueArray[i]){
+          compareRates.push(newRatesArray[i])
+       
+        }
+        else {
+          // if they are the same, no updates have occurred, so we do stochastic to change the rates 
+          const flip = Math.random()
+          if (flip > .5) {
+
+           let stochastic = (valueArray[i] - ((valueArray[i] * (Math.random() * (0.02 - 0.01) + 0.01))))
+           console.log(stochastic)
+           newRatesArray[i] = stochastic
+
+          }
+          else {
+        
+          let stochastic = (valueArray[i] + ((valueArray[i] * (Math.random() * (0.02 - 0.01) + 0.01))))
+          newRatesArray[i] = stochastic
+          }
+         
+
+        }
+      }
+
+      //same the getCurrency function, create new array with new rates that will populate the table
+
+      for (let i=0; i < newArray.length; i++) {
+
+        let currObj = {
+        currency: newArray[i].substr(3,6),
+        buy: parseFloat((1 / ((newRatesArray[i] * this.props.settings.margin) + (newRatesArray[i])))).toFixed(4),
+        sell: parseFloat(1/(((newRatesArray[i]) - (newRatesArray[i] * this.props.settings.margin)))).toFixed(4)
+        }
+
+        console.log(oldArray[i])
+        console.log(currObj)
+
+        let amountObj = {...oldArray[i], ...currObj}
+        
+
+        finalArray.push(amountObj)
+
+      }
+      
+      this.setState({
+        tableData: finalArray,
+        prevTableData: finalArray,
+      })
+
+    
+
+    }).catch(error => {
+        console.log(error)
+        this.setState({
+          error: 1
+        })
+
+    })
+
   }
 
   getCurrencyValue = () => { 
 
     const access_key = 'b520f09438b3a39356b70de4949ce37c';
-
-    axios.get('http://www.apilayer.net/api/live?access_key=' + access_key )
-      .then(results => {
   
+    const mainCurrency = this.props.settings.mainCurrency;
+    
+
+    axios.get('http://www.apilayer.net/api/live?access_key=' + access_key + '&source=' + mainCurrency)
+      .then(results => {
    
         const newArray = Object.keys(this.props.currencies)
         const amountArray = Object.values(this.props.currencies)
@@ -140,6 +237,7 @@ class MoneyExchange extends Component {
             let currObj = {
             currency: newArray[i],
             amount: amountArray[i],
+            rate: rate[i],
             buy: parseFloat((1 / ((rate[i] * this.props.settings.margin) + (rate[i])))).toFixed(4),
             sell: parseFloat(1/(((rate[i]) - (rate[i] * this.props.settings.margin)))).toFixed(4)
             };
@@ -148,21 +246,28 @@ class MoneyExchange extends Component {
 
         }
         console.log(mainArray)
+        console.log(this.props.settings)
 
         console.log(timestamp.toDate(results.data.timestamp))
         let timeStamp = (timestamp.toDate(results.data.timestamp)).toString()
         
        
-        let newSettings = obj
-        console.log(newSettings)
+        const newSettings = obj
+        console.log(mainArray)
 
         this.props.UPDATE(newSettings);
         this.setState({
+          prevTableData: mainArray,
           tableData: mainArray,
           timeStamp: timeStamp
         }, () => (this.makeTable()))
       
-      })
+      }).then(
+        () => { this.getExchangeRatesTimer()}
+      )
+
+    
+   
       
   }
 
@@ -324,7 +429,7 @@ class MoneyExchange extends Component {
 
   makeSymbol(){
     const sign = this.state.modalCurrency
-    console.log(sign)
+  
     return ( this.state.symbols[sign] )
   }
 
@@ -384,7 +489,7 @@ class MoneyExchange extends Component {
     const theExchange = (
       <div className="exchangeMoney">
       <Navigation/>
-      <span className='timestamp'>Exchange rates shown as per {this.state.timeStamp}. You have {this.state.amount} {this.props.settings.mainCurrency} left.</span>
+      <span className='timestamp'>{this.state.error == '' && <span>Exchange rates shown as per {this.state.timeStamp}</span>}. {this.state.error == 1 && <span>Could not retrieve exchange rates.</span>} You have {this.state.amount} {this.props.settings.mainCurrency} left.</span>
       <div className="table-div">
     
   <Table striped={true} bordered={false} condensed hover>
