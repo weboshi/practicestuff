@@ -1,0 +1,60 @@
+{
+    "extends": [
+      "tslint:latest",
+      "tslint-react",
+      "tslint-config-prettier",
+      "tslint-microsoft-contrib"
+    ],
+    "linterOptions": {
+      "exclude": [
+        "config/**/*.js",
+        "node_modules/**/*.ts"
+      ]
+    },
+    "rules": {
+      "no-empty-interface": false,
+      "jsx-no-lambda": false,
+      "no-console": false,
+      "no-consecutive-blank-lines": true,
+      "lines-between-class-members": true,
+      "semicolon": [
+        true,
+        "always"
+      ],
+      "linebreak-style": false,
+      "missing-jsdoc": false,
+      "no-submodule-imports": false,
+      "no-implicit-dependencies": false,
+      "no-import-side-effect": false,
+      "no-default-export": false,
+      "typedef": false,
+      "export-name": false,
+      "import-name": false,
+      "no-backbone-get-set-outside-model": false,
+      "no-relative-imports": false,
+      "react-a11y-role-has-required-aria-props": false,
+      "react-this-binding-issue": false,
+      "jsx-no-multiline-js": false,
+      "react-a11y-event-has-role": false,
+      "no-non-null-assertion": false,
+      "completed-docs": false,
+      "match-default-export-name": false,
+      "no-unsafe-any": false,
+      "strict-boolean-expressions": false,
+      "react-a11y-anchors": false,
+  
+      "no-parameter-properties": false,
+      "no-increment-decrement": false,
+      "ordered-imports": false,
+      "trailing-comma": false,
+      "no-trailing-whitespace": false,
+      "prefer-object-spread": false,
+      "no-debugger": false,
+      "max-func-body-length": false,
+      "binary-expression-operand-order": false,
+      "insecure-random": false
+    },
+    "rulesDirectory": [
+      "node_modules/tslint-lines-between-class-members"
+    ]
+  }

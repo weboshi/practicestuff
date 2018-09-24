@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Thead, Modal, Header, Body, Button, Title, OverlayTrigger, Popover, Tooltip, InputGroup, FormGroup, FormControl} from 'react-bootstrap';
+import { Table, Thead, Modal, Button, InputGroup, FormGroup, FormControl} from 'react-bootstrap';
 import { connect } from "react-redux";
 import { UPDATE, INITIALIZE, UPDATEAMOUNT } from "../../js/actions/index";
 
@@ -7,9 +7,6 @@ import timestamp from 'unix-timestamp';
 import './moneyexchange.css'
 import axios from 'axios';
 import { Navigation } from '../Navbar/Navbar';
-import { combineReducers } from 'redux';
-
-
 
 
 const styles = {
@@ -83,68 +80,55 @@ class MoneyExchange extends Component {
     this.updateRates = this.updateRates.bind(this)
   }
 
+  // Password Authorization.
   authorize = (e) => {
-    console.log('hit')
     const password = e.target.querySelector('input[type="password"]').value;
     const auth = password == this.state.password;
-    console.log(auth)
     this.setState({
       authorized: auth
     });
   }
 
+// Initializes the initial state in the Redux store, then calls the main function populates the table currency rates.
   makeTheState = () => {
-    console.log('hi')
-    console.log(this.props)
     axios.get('config.json')
-    .then(results => { 
-      console.log(results.data)
-     
-      const firstSettings = results.data
-    
-   
-      this.props.INITIALIZE(firstSettings)
-    }).then(() => {
-      this.getCurrencyValue()})
+      .then(results => { 
+        const firstSettings = results.data
+        this.props.INITIALIZE(firstSettings)
+      }).then(() => {
+        this.getCurrencyValue()})
     
   }
 
-
+//Calls the exchange rates according to the interval defined in the state/settings.
   getExchangeRatesTimer = () => {
-
     const rateInterval = (this.props.settings.interval * 60000)
-    
     setInterval(this.updateRates(), rateInterval)
 
-    
   }
 
   updateRates = () => {
-
     const access_key = 'b520f09438b3a39356b70de4949ce37c';
+
+    //Getting the currencies for an update
     const currArray = Object.keys(this.props.currencies)
+
+    //Setting the old values and currencies to compare with the new exchange rates later.
     const oldArray = this.state.tableData
-    console.log(oldArray)
-      
     const currValues = currArray.toString()
 
     axios.get('http://www.apilayer.net/api/live?access_key=' + access_key + '&currencies=' + currValues )
     .then(results => {
-      console.log(results)
-      
 
-
+      //Splitting the keys and values to update the values, having them in arrays maintains order and allows for them to be pushed together later.
       const newArray = Object.keys(results.data.quotes)
       const valueArray = Object.values(results.data.quotes)
-      console.log(valueArray)
   
       const newRatesArray = [];
       const compareRates = [];
       const finalArray = [];
 
-      // comparing old rates to new rates
-      console.log(oldArray[0].rate)
-      console.log(valueArray[0])
+      //Comparing old rates to new rates
 
       for (let i=0; i < newArray.length; i++) {
         // if the rates are different, meaning they changed, then push the values into an array to be merged later
@@ -154,44 +138,40 @@ class MoneyExchange extends Component {
         }
         else {
           // if they are the same, no updates have occurred, so we do stochastic to change the rates 
-          const flip = Math.random()
-          if (flip > .5) {
+            const flip = Math.random()
 
-           let stochastic = (valueArray[i] - ((valueArray[i] * (Math.random() * (0.02 - 0.01) + 0.01))))
-           console.log(stochastic)
-           newRatesArray[i] = stochastic
+            if (flip > .5) {
 
-          }
-          else {
-        
-          let stochastic = (valueArray[i] + ((valueArray[i] * (Math.random() * (0.02 - 0.01) + 0.01))))
-          newRatesArray[i] = stochastic
-          }
+            let stochastic = (valueArray[i] - ((valueArray[i] * (Math.random() * (0.02 - 0.01) + 0.01))))
+            newRatesArray[i] = stochastic
+
+            }
+            else {
+          
+              let stochastic = (valueArray[i] + ((valueArray[i] * (Math.random() * (0.02 - 0.01) + 0.01))))
+              newRatesArray[i] = stochastic
+            }
          
 
         }
       }
 
-      //same the getCurrency function, create new array with new rates that will populate the table
+      //same as the getCurrency function, create new array with new rates that will populate the table
 
       for (let i=0; i < newArray.length; i++) {
 
         let currObj = {
         currency: newArray[i].substr(3,6),
-        buy: parseFloat((1 / ((newRatesArray[i] * this.props.settings.margin) + (newRatesArray[i])))).toFixed(4),
-        sell: parseFloat(1/(((newRatesArray[i]) - (newRatesArray[i] * this.props.settings.margin)))).toFixed(4)
+          buy: parseFloat((1 / ((newRatesArray[i] * this.props.settings.margin) + (newRatesArray[i])))).toFixed(4),
+          sell: parseFloat(1/(((newRatesArray[i]) - (newRatesArray[i] * this.props.settings.margin)))).toFixed(4)
         }
 
-        console.log(oldArray[i])
-        console.log(currObj)
-
         let amountObj = {...oldArray[i], ...currObj}
-        
-
         finalArray.push(amountObj)
 
       }
       
+      //Setting the new values, and keeping the old values for another comparison at the next interval update.
       this.setState({
         tableData: finalArray,
         prevTableData: finalArray,
@@ -209,20 +189,25 @@ class MoneyExchange extends Component {
 
   }
 
+  //The main function that makes the API call and sets the table currency rates.
   getCurrencyValue = () => { 
 
     const access_key = 'b520f09438b3a39356b70de4949ce37c';
-  
+    
+    //Setting the main currency before making our API call
     const mainCurrency = this.props.settings.mainCurrency;
     
-
     axios.get('http://www.apilayer.net/api/live?access_key=' + access_key + '&source=' + mainCurrency)
       .then(results => {
    
+        //Splitting the response of rates into keys and values, so we can take only the values we want as defined in the initial state.
+        // After looking at the API documentation, we probably could've defined what rates we wanted before the call, but this works.
         const newArray = Object.keys(this.props.currencies)
         const amountArray = Object.values(this.props.currencies)
         const rate = []; 
         const mainCurr = this.props.settings.mainCurrency
+
+        //Little messy, but this creates the string variable so that we can get the values and put them in an array. Relies on array maintaining order.
         const varD = 'results.data.quotes.' + mainCurr
 
         for (let i=0;i<newArray.length;i++){
@@ -231,6 +216,8 @@ class MoneyExchange extends Component {
 
         var obj = {}
         var mainArray = []
+
+        //After we have our values, we pair them with the proper keys and also fix them to a decimal point.
 
         for (let i = 0; i < newArray.length; i++) {
 
@@ -245,16 +232,13 @@ class MoneyExchange extends Component {
             mainArray.push(currObj)
 
         }
-        console.log(mainArray)
-        console.log(this.props.settings)
-
-        console.log(timestamp.toDate(results.data.timestamp))
+    
+        //Used a npm package to change unix time for time stamp.
         let timeStamp = (timestamp.toDate(results.data.timestamp)).toString()
         
-       
         const newSettings = obj
-        console.log(mainArray)
 
+        //Here we set the state which will populate table, and also dispatch the rates to update the store state. 
         this.props.UPDATE(newSettings);
         this.setState({
           prevTableData: mainArray,
@@ -265,12 +249,9 @@ class MoneyExchange extends Component {
       }).then(
         () => { this.getExchangeRatesTimer()}
       )
-
-    
-   
-      
   }
 
+  //We initialize the state with compponentDidMount as per react practices.
   componentDidMount() {
     this.makeTheState()
   }
@@ -292,7 +273,7 @@ class MoneyExchange extends Component {
   }
 
   handleChange(event) {
-    console.log(this.props.settings.commission)
+
     this.setState({ amountToBuy: event.target.value }, () => {
  
       this.handleTotal();
@@ -302,7 +283,7 @@ class MoneyExchange extends Component {
   }
 
   handleChange2(event) {
-    console.log(this.props.settings.commission)
+
     this.setState({ amountToBuy: event.target.value }, () => {
  
       this.handleTotal2();
@@ -311,7 +292,7 @@ class MoneyExchange extends Component {
 
   }
 
-
+  //Here we handle the modal logic for buying or selling currencies. This updates the values so amounts are calculated as typed. 
   handleTotal(){
     let subTotal = Number(parseFloat((this.state.amountToBuy * this.state.buyRate)).toFixed(4))
     let totalPurchaseAmount = Number(parseFloat((subTotal + this.props.settings.commission)).toFixed(4))
@@ -322,6 +303,7 @@ class MoneyExchange extends Component {
     })
   }
 
+  //Same logic as above but for selling modal.
   handleTotal2(){
     let subTotal = Number(parseFloat((this.state.amountToBuy * this.state.sellRate)).toFixed(4))
     let totalPurchaseAmount = Number(parseFloat((subTotal + this.props.settings.commission)).toFixed(4))
@@ -331,7 +313,7 @@ class MoneyExchange extends Component {
     })
   }
 
-
+  //Logic for finishing the purchase transaction.
   handlePurchase(){
     const newAmount = (this.state.amount - this.state.amountToBuy)
     if(this.state.amountToBuy > this.state.amount){
@@ -341,10 +323,8 @@ class MoneyExchange extends Component {
     }
 
     else {
- 
       let newCurr = this.state.modalCurrency
       const newTotal = {[newCurr]: newAmount}
-
       this.props.UPDATEAMOUNT(newTotal)
       alert('You purchased ' + this.state.amountToBuy + " " + this.state.modalCurrency + ' for $' + this.state.totalPurchaseAmount)
       this.setState({ 
@@ -354,6 +334,7 @@ class MoneyExchange extends Component {
     }
   }
 
+  //Logic for selling transaction.
   handleSale(){
     const newAmount = (this.props.settings.amount + this.state.totalPurchaseAmount)
     
@@ -368,8 +349,6 @@ class MoneyExchange extends Component {
       const total = (parseFloat(this.state.amountToBuy) + this.state.amount)
       const newTotal = {[this.state.modalCurrency]: total}
       const newObj = {amount: newAmount}
-      console.log(newTotal)
-  
       this.props.UPDATE(newObj)
       this.props.UPDATEAMOUNT(newTotal)
       alert('You exchanged ' + this.state.amountToBuy + " " + this.state.modalCurrency + ' for $' + this.state.totalPurchaseAmount)
@@ -380,18 +359,12 @@ class MoneyExchange extends Component {
     }
   }
 
+  //Handles cell clicks for the buying column.
   handleCellClick = (event,row) => {
-      console.log(event.target.dataset.value)
+
 
       const handleString = (event.target.dataset.value).split(',');
-    
-      console.log(handleString)
-
       const label = (event.target.id + " " + handleString[0])
-      console.log(label)
-      console.log(parseFloat(handleString[1]))
-
-
       this.setState({
       modalCurrency: handleString[0],
       buyRate: parseFloat(handleString[1]),
@@ -404,19 +377,13 @@ class MoneyExchange extends Component {
   
   }
 
+  //Handles cell clicks for the selling column. 
   handleCellClick2 = (event,row) => {
-    console.log(event.target.dataset.value)
+
 
     const handleString = (event.target.dataset.value).split(',');
-  
-    console.log(handleString)
-
     const label = (event.target.id + " " + handleString[0])
-    console.log(label)
-    console.log(parseFloat(handleString[1]))
 
-
- 
     this.setState({
       modalCurrency: handleString[0],
       sellRate: parseFloat(handleString[1]),
@@ -428,12 +395,14 @@ class MoneyExchange extends Component {
     
   }
 
+  //Putting the symbol currency in the modal for the selected currency.
   makeSymbol(){
     const sign = this.state.modalCurrency
   
     return ( this.state.symbols[sign] )
   }
 
+  //Makes the table by using a for loop to push the rows and the onclick functions so that calls can be clickeked.
   makeTable(){
 
     const tableStuff = this.state.tableData
@@ -458,19 +427,13 @@ class MoneyExchange extends Component {
 
   getValidationState() {
     const type = typeof(this.state.value)
-
-  
     if (type == 'number') return 'success';
     else 
     return null;
   }
 
   render(){
-    const popover = (
-      <Popover id="modal-popover" title="popover">
-        very popover. such engagement
-      </Popover>
-    );
+
     const login = (
       <div className='password-container'>
       <div className='password-splash'>
@@ -484,39 +447,36 @@ class MoneyExchange extends Component {
       </div>
   );
 
-
-
-
     const theExchange = (
       <div className="exchangeMoney">
       <Navigation/>
       <span className='timestamp'>{this.state.error == '' && <span>Exchange rates shown as per {this.state.timeStamp}</span>}. {this.state.error == 1 && <span>Could not retrieve exchange rates.</span>} You have {this.state.amount} {this.props.settings.mainCurrency} left.</span>
       <div className="table-div">
     
-  <Table striped={true} bordered={false} condensed hover>
-  <thead>
-    <tr>
-      <th>Currency</th>
-      <th>Buy Rate</th>
-      <th>Sell Rate</th>
-      <th>Amount</th>
-    </tr>
-  </thead>
+        <Table striped={true} bordered={false} condensed hover>
+        <thead>
+          <tr>
+            <th>Currency</th>
+            <th>Buy Rate</th>
+            <th>Sell Rate</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+          {this.state.table}
+        </Table>
 
-  {this.state.table}
-  </Table>
       <Modal show={this.state.show} onHide={this.handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>{this.state.label}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-      <FormGroup>
-                <InputGroup >
-                <InputGroup.Addon>{this.makeSymbol()}</InputGroup.Addon>
-                  <FormControl type='number' id='amountToBuy' onChange={this.handleChange} value={this.state.amountToBuy}/>
-                    <InputGroup.Addon>.00</InputGroup.Addon>
-                </InputGroup>
-      </FormGroup>
+        <FormGroup>
+                  <InputGroup >
+                  <InputGroup.Addon>{this.makeSymbol()}</InputGroup.Addon>
+                    <FormControl type='number' id='amountToBuy' onChange={this.handleChange} value={this.state.amountToBuy}/>
+                      <InputGroup.Addon>.00</InputGroup.Addon>
+                  </InputGroup>
+        </FormGroup>
       <Table className='tableModal'>
         <tbody>
           <tr>
@@ -590,7 +550,6 @@ class MoneyExchange extends Component {
 </div>
 
     )
-    
     return(
       <div>
       {this.state.authorized ? theExchange : login }
@@ -598,7 +557,6 @@ class MoneyExchange extends Component {
       </div>
     )
   }}
-
 
 const Exchange = connect(mapStateToProps, mapDispatchToProps)(MoneyExchange);
 export default Exchange;
